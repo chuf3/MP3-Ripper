@@ -1,6 +1,14 @@
 import os
 import subprocess
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    send_from_directory,
+    make_response,
+)
 import yt_dlp
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -49,7 +57,12 @@ def index():
 
 @app.route("/download/<filename>")
 def download(filename):
-    return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
+    response = make_response(
+        send_from_directory(DOWNLOAD_DIR, filename, as_attachment=False)
+    )
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Accept-Ranges"] = "bytes"
+    return response
 
 
 @app.route("/delete/<filename>")
@@ -97,24 +110,24 @@ def trim():
     tmp = os.path.join(DOWNLOAD_DIR, "tmp_" + filename)
 
     subprocess.run(
-[
-        "ffmpeg",
-        "-y",
-        "-i",
-        src,
-        "-ss",
-        start,
-        "-to",
-        end,
-        "-vn",
-        "-acodec",
-        "libmp3lame",
-        "-ab",
-        "192k",
-        tmp,
-    ],
-    check=True,
-)
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            src,
+            "-ss",
+            start,
+            "-to",
+            end,
+            "-vn",
+            "-acodec",
+            "libmp3lame",
+            "-ab",
+            "192k",
+            tmp,
+        ],
+        check=True,
+    )
 
     os.replace(tmp, src)
     return redirect(url_for("index"))
