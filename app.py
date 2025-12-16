@@ -26,6 +26,7 @@ def index():
                 }
             ],
             "quiet": True,
+            "js_runtimes": ["deno"],
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
