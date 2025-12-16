@@ -97,21 +97,24 @@ def trim():
     tmp = os.path.join(DOWNLOAD_DIR, "tmp_" + filename)
 
     subprocess.run(
-        [
-            "ffmpeg",
-            "-y",
-            "-i",
-            src,
-            "-ss",
-            start,
-            "-to",
-            end,
-            "-c",
-            "copy",
-            tmp,
-        ],
-        check=True,
-    )
+[
+        "ffmpeg",
+        "-y",
+        "-i",
+        src,
+        "-ss",
+        start,
+        "-to",
+        end,
+        "-vn",
+        "-acodec",
+        "libmp3lame",
+        "-ab",
+        "192k",
+        tmp,
+    ],
+    check=True,
+)
 
     os.replace(tmp, src)
     return redirect(url_for("index"))
