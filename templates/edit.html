@@ -54,7 +54,7 @@
 <div class="container">
   <h2>Edit {{ filename }}</h2>
 
-  <audio id="player" controls></audio>
+  <audio id="player" controls preload="metadata"></audio>
 
   <p>
     Start: <span id="startVal">0</span>s
@@ -63,7 +63,7 @@
 
   <p>
     End: <span id="endVal">0</span>s
-    <input class="slider" type="range" id="end" min="0" step="0.1" value="0">
+    <input class="slider" type="range" id="end" min="0" step="0.1">
   </p>
 
   <form method="post" action="/trim" onsubmit="return submitTimes()">
@@ -87,17 +87,19 @@
   const endInput = document.getElementById("endInput");
   const spinner = document.getElementById("spinner");
 
-  audio.src = "/download/{{ filename }}";
+  audio.src = "/download/{{ filename }}?t=" + Date.now();
 
   audio.addEventListener("loadedmetadata", () => {
     startSlider.max = audio.duration;
     endSlider.max = audio.duration;
     endSlider.value = audio.duration;
+
+    startVal.textContent = "0.0";
     endVal.textContent = audio.duration.toFixed(1);
   });
 
   startSlider.addEventListener("input", () => {
-    if (parseFloat(startSlider.value) >= parseFloat(endSlider.value)) {
+    if (+startSlider.value >= +endSlider.value) {
       startSlider.value = endSlider.value - 0.1;
     }
     startVal.textContent = startSlider.value;
@@ -105,17 +107,15 @@
   });
 
   endSlider.addEventListener("input", () => {
-    if (parseFloat(endSlider.value) <= parseFloat(startSlider.value)) {
-      endSlider.value = parseFloat(startSlider.value) + 0.1;
+    if (+endSlider.value <= +startSlider.value) {
+      endSlider.value = +startSlider.value + 0.1;
     }
     endVal.textContent = endSlider.value;
   });
 
-  // Clamp playback to selected range
   audio.addEventListener("timeupdate", () => {
-    if (audio.currentTime > parseFloat(endSlider.value)) {
-      audio.currentTime = startSlider.value;
-      audio.play();
+    if (audio.currentTime > +endSlider.value) {
+      audio.pause();
     }
   });
 
