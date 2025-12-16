@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    :root {
-      --accent: #d63384;
-    }
+    :root { --accent: #d63384; }
 
     body {
       font-family: system-ui, sans-serif;
@@ -19,21 +17,15 @@
     .container {
       max-width: 700px;
       margin: auto;
-      background: #ffffff;
+      background: #fff;
       padding: 16px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
-    h2 {
-      color: var(--accent);
-      margin-top: 0;
-    }
+    h2 { color: var(--accent); margin-top: 0; }
 
-    audio {
-      width: 100%;
-      margin-bottom: 12px;
-    }
+    audio { width: 100%; margin-bottom: 12px; }
 
     .slider {
       width: 100%;
@@ -50,10 +42,6 @@
       cursor: pointer;
     }
 
-    .actions {
-      margin-top: 12px;
-    }
-
     .spinner {
       display: none;
       margin-top: 10px;
@@ -63,69 +51,80 @@
 </head>
 
 <body>
-  <div class="container">
-    <h2>Edit {{ filename }}</h2>
+<div class="container">
+  <h2>Edit {{ filename }}</h2>
 
-    <audio id="player" controls src="/download/{{ filename }}"></audio>
+  <audio id="player" controls></audio>
 
-    <p>
-      Start: <span id="startVal">0</span>s
-      <input class="slider" type="range" id="start" min="0" step="0.1" value="0">
-    </p>
+  <p>
+    Start: <span id="startVal">0</span>s
+    <input class="slider" type="range" id="start" min="0" step="0.1" value="0">
+  </p>
 
-    <p>
-      End: <span id="endVal">0</span>s
-      <input class="slider" type="range" id="end" min="0" step="0.1" value="0">
-    </p>
+  <p>
+    End: <span id="endVal">0</span>s
+    <input class="slider" type="range" id="end" min="0" step="0.1" value="0">
+  </p>
 
-    <form method="post" action="/trim" onsubmit="return submitTimes()">
-      <input type="hidden" name="filename" value="{{ filename }}">
-      <input type="hidden" name="start" id="startInput">
-      <input type="hidden" name="end" id="endInput">
+  <form method="post" action="/trim" onsubmit="return submitTimes()">
+    <input type="hidden" name="filename" value="{{ filename }}">
+    <input type="hidden" name="start" id="startInput">
+    <input type="hidden" name="end" id="endInput">
+    <button type="submit">Save (Overwrite)</button>
+    <a href="/" style="margin-left:12px;">Cancel</a>
+  </form>
 
-      <button type="submit">Save (Overwrite)</button>
-      <a href="/" style="margin-left: 12px;">Cancel</a>
-    </form>
+  <div class="spinner" id="spinner">⏳ Trimming…</div>
+</div>
 
-    <div class="spinner" id="spinner">⏳ Trimming…</div>
-  </div>
+<script>
+  const audio = document.getElementById("player");
+  const startSlider = document.getElementById("start");
+  const endSlider = document.getElementById("end");
+  const startVal = document.getElementById("startVal");
+  const endVal = document.getElementById("endVal");
+  const startInput = document.getElementById("startInput");
+  const endInput = document.getElementById("endInput");
+  const spinner = document.getElementById("spinner");
 
-  <script>
-    const audio = document.getElementById('player');
-    const startSlider = document.getElementById('start');
-    const endSlider = document.getElementById('end');
-    const startVal = document.getElementById('startVal');
-    const endVal = document.getElementById('endVal');
-    const startInput = document.getElementById('startInput');
-    const endInput = document.getElementById('endInput');
-    const spinner = document.getElementById('spinner');
+  audio.src = "/download/{{ filename }}";
 
-    audio.addEventListener('loadedmetadata', () => {
-      startSlider.max = audio.duration;
-      endSlider.max = audio.duration;
-      endSlider.value = audio.duration;
-      endVal.innerText = audio.duration.toFixed(1);
-    });
+  audio.addEventListener("loadedmetadata", () => {
+    startSlider.max = audio.duration;
+    endSlider.max = audio.duration;
+    endSlider.value = audio.duration;
+    endVal.textContent = audio.duration.toFixed(1);
+  });
 
-    startSlider.oninput = () => {
-      startVal.innerText = startSlider.value;
-      audio.currentTime = startSlider.value;
-    };
-
-    endSlider.oninput = () => {
-      endVal.innerText = endSlider.value;
-    };
-
-    function submitTimes() {
-      if (parseFloat(startSlider.value) >= parseFloat(endSlider.value)) {
-        alert('Start must be less than End');
-        return false;
-      }
-      startInput.value = startSlider.value;
-      endInput.value = endSlider.value;
-      spinner.style.display = 'block';
-      return true;
+  startSlider.addEventListener("input", () => {
+    if (parseFloat(startSlider.value) >= parseFloat(endSlider.value)) {
+      startSlider.value = endSlider.value - 0.1;
     }
-  </script>
+    startVal.textContent = startSlider.value;
+    audio.currentTime = startSlider.value;
+  });
+
+  endSlider.addEventListener("input", () => {
+    if (parseFloat(endSlider.value) <= parseFloat(startSlider.value)) {
+      endSlider.value = parseFloat(startSlider.value) + 0.1;
+    }
+    endVal.textContent = endSlider.value;
+  });
+
+  // Clamp playback to selected range
+  audio.addEventListener("timeupdate", () => {
+    if (audio.currentTime > parseFloat(endSlider.value)) {
+      audio.currentTime = startSlider.value;
+      audio.play();
+    }
+  });
+
+  function submitTimes() {
+    startInput.value = startSlider.value;
+    endInput.value = endSlider.value;
+    spinner.style.display = "block";
+    return true;
+  }
+</script>
 </body>
 </html>
