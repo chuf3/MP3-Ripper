@@ -16,20 +16,17 @@ def index():
         url = request.form["url"]
 
                 ydl_opts = {
-            "format": "bestaudio/best",
-            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
-            "postprocessors": [
-                {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }
-            ],
-            "quiet": True,
-            "js_runtimes": {
-                "deno": {}
-            },
+    "format": "bestaudio/best",
+    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
+    "postprocessors": [
+        {
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
         }
+    ],
+    "quiet": True,
+}
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
