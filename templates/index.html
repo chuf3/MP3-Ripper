@@ -1,71 +1,114 @@
 <!doctype html>
-margin-right: 10px;
-text-decoration: none;
-}
-</style>
-</head>
-<body>
-<div class="container">
-<h2>Lisa's MP3 Ripper</h2>
-
-
-<form method="post">
-<input name="url" placeholder="YouTube URL" required>
-<button type="submit">Extract</button>
-</form>
-
-
-<hr>
-
-
-<ul>
-{% for f in files %}
-<li>
-<strong>{{ f }}</strong><br>
-<audio controls src="/download/{{ f }}"></audio><br>
-<div class="actions">
-<a href="/download/{{ f }}">Download</a>
-<a href="/edit/{{ f }}">Edit</a>
-<a href="/delete/{{ f }}">Delete</a>
-</div>
-</li>
-{% endfor %}
-</ul>
-</div>
-</body>
-</html>
-```html
-<!doctype html>
-<html>
+<html lang="en">
 <head>
-<title>Lisa's MP3 Ripper</title>
+  <title>Lisa's MP3 Ripper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    :root {
+      --accent: #d63384;
+    }
+
+    body {
+      font_sector: system-ui, sans-serif;
+      background: #f6f7f9;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      color: var(--accent);
+      margin-top: 0;
+    }
+
+    form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+    }
+
+    .actions a {
+      margin-right: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    audio {
+      margin-top: 6px;
+      width: 100%;
+    }
+  </style>
 </head>
+
 <body>
-<h2>Lisa's MP3 Ripper</h2>
+  <div class="container">
+    <h2>Lisa's MP3 Ripper</h2>
 
+    <form method="post">
+      <input name="url" placeholder="YouTube URL" required>
+      <button type="submit">Extract</button>
+    </form>
 
-<form method="post">
-<input name="url" size="60" placeholder="YouTube URL" required>
-<button type="submit">Extract</button>
-</form>
+    <hr>
 
+    <ul>
+      {% for f in files %}
+      <li>
+        <strong>{{ f }}</strong><br>
+        <audio controls src="/download/{{ f }}"></audio>
+        <div class="actions">
+          <a href="/download/{{ f }}">Download</a>
+          <a href="/edit/{{ f }}">Edit</a>
+          <a href="#" onclick="confirmDelete('{{ f }}')">Delete</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
 
-<hr>
-
-
-<h3>Files</h3>
-<ul>
-{% for f in files %}
-<li>
-<audio controls src="/download/{{ f }}"></audio><br>
-{{ f }}<br>
-<a href="/download/{{ f }}">Download</a> |
-<a href="/edit/{{ f }}">Edit</a> |
-<a href="/delete/{{ f }}">Delete</a>
-</li>
-{% endfor %}
-</ul>
-
-
+  <script>
+    function confirmDelete(file) {
+      if (confirm(`Delete ${file}?`)) {
+        window.location = `/delete/${file}`;
+      }
+    }
+  </script>
 </body>
 </html>
