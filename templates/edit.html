@@ -1,73 +1,131 @@
 <!doctype html>
-
-
-<script>
-const audio = document.getElementById('player');
-const startSlider = document.getElementById('start');
-const endSlider = document.getElementById('end');
-const startVal = document.getElementById('startVal');
-const endVal = document.getElementById('endVal');
-
-
-const startInput = document.getElementById('startInput');
-const endInput = document.getElementById('endInput');
-
-
-audio.addEventListener('loadedmetadata', () => {
-startSlider.max = audio.duration;
-endSlider.max = audio.duration;
-endSlider.value = audio.duration;
-endVal.innerText = audio.duration.toFixed(1);
-});
-
-
-startSlider.oninput = () => {
-startVal.innerText = startSlider.value;
-audio.currentTime = startSlider.value;
-};
-
-
-endSlider.oninput = () => {
-endVal.innerText = endSlider.value;
-};
-
-
-function submitTimes() {
-if (parseFloat(startSlider.value) >= parseFloat(endSlider.value)) {
-alert('Start must be less than End');
-return false;
-}
-startInput.value = startSlider.value;
-endInput.value = endSlider.value;
-return true;
-}
-</script>
-
-
-</body>
-</html>
-```html
-<!doctype html>
-<html>
+<html lang="en">
 <head>
-<title>Edit – Lisa's MP3 Ripper</title>
+  <title>Edit – Lisa's MP3 Ripper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    :root {
+      --accent: #d63384;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f6f7f9;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      color: var(--accent);
+      margin-top: 0;
+    }
+
+    audio {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .slider {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .actions {
+      margin-top: 12px;
+    }
+
+    .spinner {
+      display: none;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+  </style>
 </head>
+
 <body>
-<h2>Edit {{ filename }}</h2>
+  <div class="container">
+    <h2>Edit {{ filename }}</h2>
 
+    <audio id="player" controls src="/download/{{ filename }}"></audio>
 
-audio playback
-<audio id="player" controls src="/download/{{ filename }}"></audio>
+    <p>
+      Start: <span id="startVal">0</span>s
+      <input class="slider" type="range" id="start" min="0" step="0.1" value="0">
+    </p>
 
+    <p>
+      End: <span id="endVal">0</span>s
+      <input class="slider" type="range" id="end" min="0" step="0.1" value="0">
+    </p>
 
-<form method="post" action="/trim">
-<input type="hidden" name="filename" value="{{ filename }}">
-<p>Start (seconds): <input type="number" name="start" step="0.1" value="0"></p>
-<p>End (seconds): <input type="number" name="end" step="0.1" required></p>
-<button type="submit">Save (Overwrite)</button>
-</form>
+    <form method="post" action="/trim" onsubmit="return submitTimes()">
+      <input type="hidden" name="filename" value="{{ filename }}">
+      <input type="hidden" name="start" id="startInput">
+      <input type="hidden" name="end" id="endInput">
 
+      <button type="submit">Save (Overwrite)</button>
+      <a href="/" style="margin-left: 12px;">Cancel</a>
+    </form>
 
-<a href="/">Cancel</a>
+    <div class="spinner" id="spinner">⏳ Trimming…</div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('player');
+    const startSlider = document.getElementById('start');
+    const endSlider = document.getElementById('end');
+    const startVal = document.getElementById('startVal');
+    const endVal = document.getElementById('endVal');
+    const startInput = document.getElementById('startInput');
+    const endInput = document.getElementById('endInput');
+    const spinner = document.getElementById('spinner');
+
+    audio.addEventListener('loadedmetadata', () => {
+      startSlider.max = audio.duration;
+      endSlider.max = audio.duration;
+      endSlider.value = audio.duration;
+      endVal.innerText = audio.duration.toFixed(1);
+    });
+
+    startSlider.oninput = () => {
+      startVal.innerText = startSlider.value;
+      audio.currentTime = startSlider.value;
+    };
+
+    endSlider.oninput = () => {
+      endVal.innerText = endSlider.value;
+    };
+
+    function submitTimes() {
+      if (parseFloat(startSlider.value) >= parseFloat(endSlider.value)) {
+        alert('Start must be less than End');
+        return false;
+      }
+      startInput.value = startSlider.value;
+      endInput.value = endSlider.value;
+      spinner.style.display = 'block';
+      return true;
+    }
+  </script>
 </body>
 </html>
