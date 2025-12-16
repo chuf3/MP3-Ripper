@@ -6,47 +6,15 @@
 
   <style>
     :root { --accent: #d63384; }
-
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f6f7f9;
-      margin: 0;
-      padding: 16px;
-    }
-
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: #fff;
-      padding: 16px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    h2 { color: var(--accent); margin-top: 0; }
-
-    audio { width: 100%; margin-bottom: 12px; }
-
-    .slider {
-      width: 100%;
-      accent-color: var(--accent);
-    }
-
-    button {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .spinner {
-      display: none;
-      margin-top: 10px;
-      font-weight: 500;
-    }
+    body { font-family: system-ui, sans-serif; background:#f6f7f9; padding:16px; }
+    .container { max-width:700px; margin:auto; background:#fff; padding:16px;
+                 border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.08); }
+    h2 { color:var(--accent); margin-top:0; }
+    audio { width:100%; margin-bottom:8px; }
+    .slider { width:100%; accent-color:var(--accent); }
+    button { background:var(--accent); border:none; color:#fff;
+             padding:10px 14px; border-radius:6px; margin-right:6px; }
+    .spinner { display:none; margin-top:10px; }
   </style>
 </head>
 
@@ -54,11 +22,16 @@
 <div class="container">
   <h2>Edit {{ filename }}</h2>
 
-  <audio id="player" controls preload="metadata"></audio>
+  <audio id="player" controls playsinline preload="metadata"></audio>
+
+  <div style="margin-bottom:10px;">
+    <button type="button" onclick="playFromStart()">Play From Start</button>
+    <button type="button" onclick="playSelection()">Play Selection</button>
+  </div>
 
   <p>
     Start: <span id="startVal">0</span>s
-    <input class="slider" type="range" id="start" min="0" step="0.1" value="0">
+    <input class="slider" type="range" id="start" min="0" step="0.1">
   </p>
 
   <p>
@@ -71,7 +44,7 @@
     <input type="hidden" name="start" id="startInput">
     <input type="hidden" name="end" id="endInput">
     <button type="submit">Save (Overwrite)</button>
-    <a href="/" style="margin-left:12px;">Cancel</a>
+    <a href="/" style="margin-left:10px;">Cancel</a>
   </form>
 
   <div class="spinner" id="spinner">⏳ Trimming…</div>
@@ -87,37 +60,40 @@
   const endInput = document.getElementById("endInput");
   const spinner = document.getElementById("spinner");
 
-  audio.src = "/download/{{ filename }}?t=" + Date.now();
+  audio.src = `/download/{{ filename }}?v=${Date.now()}`;
 
   audio.addEventListener("loadedmetadata", () => {
     startSlider.max = audio.duration;
     endSlider.max = audio.duration;
+    startSlider.value = 0;
     endSlider.value = audio.duration;
-
     startVal.textContent = "0.0";
     endVal.textContent = audio.duration.toFixed(1);
   });
 
-  startSlider.addEventListener("input", () => {
+  startSlider.oninput = () => {
     if (+startSlider.value >= +endSlider.value) {
       startSlider.value = endSlider.value - 0.1;
     }
     startVal.textContent = startSlider.value;
-    audio.currentTime = startSlider.value;
-  });
+  };
 
-  endSlider.addEventListener("input", () => {
+  endSlider.oninput = () => {
     if (+endSlider.value <= +startSlider.value) {
       endSlider.value = +startSlider.value + 0.1;
     }
     endVal.textContent = endSlider.value;
-  });
+  };
 
-  audio.addEventListener("timeupdate", () => {
-    if (audio.currentTime > +endSlider.value) {
-      audio.pause();
-    }
-  });
+  function playFromStart() {
+    audio.currentTime = startSlider.value;
+    audio.play();
+  }
+
+  function playSelection() {
+    audio.currentTime = startSlider.value;
+    audio.play();
+  }
 
   function submitTimes() {
     startInput.value = startSlider.value;
