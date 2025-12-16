@@ -1,0 +1,73 @@
+<!doctype html>
+
+
+<script>
+const audio = document.getElementById('player');
+const startSlider = document.getElementById('start');
+const endSlider = document.getElementById('end');
+const startVal = document.getElementById('startVal');
+const endVal = document.getElementById('endVal');
+
+
+const startInput = document.getElementById('startInput');
+const endInput = document.getElementById('endInput');
+
+
+audio.addEventListener('loadedmetadata', () => {
+startSlider.max = audio.duration;
+endSlider.max = audio.duration;
+endSlider.value = audio.duration;
+endVal.innerText = audio.duration.toFixed(1);
+});
+
+
+startSlider.oninput = () => {
+startVal.innerText = startSlider.value;
+audio.currentTime = startSlider.value;
+};
+
+
+endSlider.oninput = () => {
+endVal.innerText = endSlider.value;
+};
+
+
+function submitTimes() {
+if (parseFloat(startSlider.value) >= parseFloat(endSlider.value)) {
+alert('Start must be less than End');
+return false;
+}
+startInput.value = startSlider.value;
+endInput.value = endSlider.value;
+return true;
+}
+</script>
+
+
+</body>
+</html>
+```html
+<!doctype html>
+<html>
+<head>
+<title>Edit – Lisa's MP3 Ripper</title>
+</head>
+<body>
+<h2>Edit {{ filename }}</h2>
+
+
+audio playback
+<audio id="player" controls src="/download/{{ filename }}"></audio>
+
+
+<form method="post" action="/trim">
+<input type="hidden" name="filename" value="{{ filename }}">
+<p>Start (seconds): <input type="number" name="start" step="0.1" value="0"></p>
+<p>End (seconds): <input type="number" name="end" step="0.1" required></p>
+<button type="submit">Save (Overwrite)</button>
+</form>
+
+
+<a href="/">Cancel</a>
+</body>
+</html>
