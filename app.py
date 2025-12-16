@@ -16,19 +16,20 @@ def index():
         url = request.form["url"]
 
         ydl_opts = {
-    "format": "bestaudio/best",
-    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(id)s.%(ext)s"),
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
+            "format": "bestaudio/best",
+            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(id)s.%(ext)s"),
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }
+            ],
+            "quiet": True,
+            "nopart": True,
+            "overwrites": True,
+            "noplaylist": True,
         }
-    ],
-    "quiet": True,
-    "nopart": True,
-    "overwrites": True,
-}
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
@@ -36,7 +37,14 @@ def index():
         return redirect(url_for("index"))
 
     files = sorted(f for f in os.listdir(DOWNLOAD_DIR) if f.endswith(".mp3"))
-    return render_template("index.html", files=files)
+    temp_files = [f for f in files if f.startswith("tmp_")]
+
+    return render_template(
+        "index.html",
+        files=files,
+        has_files=len(files) > 0,
+        has_temp_files=len(temp_files) > 0,
+    )
 
 
 @app.route("/download/<filename>")
@@ -46,7 +54,31 @@ def download(filename):
 
 @app.route("/delete/<filename>")
 def delete(filename):
-    os.remove(os.path.join(DOWNLOAD_DIR, filename))
+    path = os.path.join(DOWNLOAD_DIR, filename)
+    if os.path.exists(path):
+        os.remove(path)
+    return redirect(url_for("index"))
+
+
+@app.route("/clear", methods=["POST"])
+def clear_downloads():
+    for f in os.listdir(DOWNLOAD_DIR):
+        if f.endswith(".mp3") and not f.startswith("tmp_"):
+            try:
+                os.remove(os.path.join(DOWNLOAD_DIR, f))
+            except Exception:
+                pass
+    return redirect(url_for("index"))
+
+
+@app.route("/clear-temp", methods=["POST"])
+def clear_temp_files():
+    for f in os.listdir(DOWNLOAD_DIR):
+        if f.startswith("tmp_") and f.endswith(".mp3"):
+            try:
+                os.remove(os.path.join(DOWNLOAD_DIR, f))
+            except Exception:
+                pass
     return redirect(url_for("index"))
 
 
@@ -83,6 +115,11 @@ def trim():
 
     os.replace(tmp, src)
     return redirect(url_for("index"))
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return "", 204
 
 
 if __name__ == "__main__":
