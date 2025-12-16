@@ -60,7 +60,7 @@
   const endInput = document.getElementById("endInput");
   const spinner = document.getElementById("spinner");
 
-  audio.src = `/download/{{ filename }}?v=${Date.now()}`;
+  audio.src = `/stream/{{ filename }}?v=${Date.now()}`;
 
   audio.addEventListener("loadedmetadata", () => {
     startSlider.max = audio.duration;
