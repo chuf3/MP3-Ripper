@@ -15,7 +15,7 @@ def index():
     if request.method == "POST":
         url = request.form["url"]
 
-        ydl_opts = {
+                ydl_opts = {
             "format": "bestaudio/best",
             "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
             "postprocessors": [
@@ -26,7 +26,9 @@ def index():
                 }
             ],
             "quiet": True,
-            "js_runtimes": ["deno"],
+            "js_runtimes": {
+                "deno": {}
+            },
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
