@@ -1,0 +1,71 @@
+<!doctype html>
+margin-right: 10px;
+text-decoration: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Lisa's MP3 Ripper</h2>
+
+
+<form method="post">
+<input name="url" placeholder="YouTube URL" required>
+<button type="submit">Extract</button>
+</form>
+
+
+<hr>
+
+
+<ul>
+{% for f in files %}
+<li>
+<strong>{{ f }}</strong><br>
+<audio controls src="/download/{{ f }}"></audio><br>
+<div class="actions">
+<a href="/download/{{ f }}">Download</a>
+<a href="/edit/{{ f }}">Edit</a>
+<a href="/delete/{{ f }}">Delete</a>
+</div>
+</li>
+{% endfor %}
+</ul>
+</div>
+</body>
+</html>
+```html
+<!doctype html>
+<html>
+<head>
+<title>Lisa's MP3 Ripper</title>
+</head>
+<body>
+<h2>Lisa's MP3 Ripper</h2>
+
+
+<form method="post">
+<input name="url" size="60" placeholder="YouTube URL" required>
+<button type="submit">Extract</button>
+</form>
+
+
+<hr>
+
+
+<h3>Files</h3>
+<ul>
+{% for f in files %}
+<li>
+<audio controls src="/download/{{ f }}"></audio><br>
+{{ f }}<br>
+<a href="/download/{{ f }}">Download</a> |
+<a href="/edit/{{ f }}">Edit</a> |
+<a href="/delete/{{ f }}">Delete</a>
+</li>
+{% endfor %}
+</ul>
+
+
+</body>
+</html>
