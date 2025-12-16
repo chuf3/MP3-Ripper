@@ -55,13 +55,24 @@ def index():
     )
 
 
-@app.route("/download/<filename>")
-def download(filename):
+# 🎵 STREAM for audio playback (mobile-safe)
+@app.route("/stream/<filename>")
+def stream(filename):
     response = make_response(
         send_from_directory(DOWNLOAD_DIR, filename, as_attachment=False)
     )
     response.headers["Cache-Control"] = "no-store"
     response.headers["Accept-Ranges"] = "bytes"
+    return response
+
+
+# ⬇️ FORCE file download
+@app.route("/download/<filename>")
+def download(filename):
+    response = make_response(
+        send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
+    )
+    response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -130,6 +141,8 @@ def trim():
     )
 
     os.replace(tmp, src)
+    os.utime(src, None)  # force timestamp update (mobile cache fix)
+
     return redirect(url_for("index"))
 
 
