@@ -10,7 +10,7 @@
     }
 
     body {
-      font_sector: system-ui, sans-serif;
+      font-family: system-ui, sans-serif;
       background: #f6f7f9;
       margin: 0;
       padding: 16px;
@@ -34,6 +34,7 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      margin-bottom: 8px;
     }
 
     input {
@@ -50,6 +51,15 @@
       border-radius: 6px;
       font-size: 1rem;
       cursor: pointer;
+    }
+
+    button.secondary {
+      background: #999;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
 
     ul {
@@ -86,10 +96,23 @@
       <button type="submit">Extract</button>
     </form>
 
+    <form method="post" action="/clear" onsubmit="return confirmClear()">
+      <button class="secondary" type="submit" {% if not has_files %}disabled{% endif %}>
+        Clear All Downloads
+      </button>
+    </form>
+
+    <form method="post" action="/clear-temp" onsubmit="return confirmClearTemp()">
+      <button class="secondary" type="submit" {% if not has_temp_files %}disabled{% endif %}>
+        Clear Trimmed Temp Files
+      </button>
+    </form>
+
     <hr>
 
     <ul>
       {% for f in files %}
+      {% if not f.startswith('tmp_') %}
       <li>
         <strong>{{ f }}</strong><br>
         <audio controls src="/download/{{ f }}"></audio>
@@ -99,15 +122,22 @@
           <a href="#" onclick="confirmDelete('{{ f }}')">Delete</a>
         </div>
       </li>
+      {% endif %}
       {% endfor %}
     </ul>
   </div>
 
   <script>
     function confirmDelete(file) {
-      if (confirm(`Delete ${file}?`)) {
-        window.location = `/delete/${file}`;
-      }
+      return confirm(`Delete ${file}?`) && (window.location = `/delete/${file}`);
+    }
+
+    function confirmClear() {
+      return confirm("Delete ALL downloaded MP3 files?");
+    }
+
+    function confirmClearTemp() {
+      return confirm("Delete all temporary trimmed files?");
     }
   </script>
 </body>
